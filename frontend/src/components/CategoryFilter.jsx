@@ -1,18 +1,4 @@
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
@@ -23,57 +9,23 @@ import {
   Squares2X2Icon,
 } from "@heroicons/react/20/solid";
 import Pagination from "./Pagination";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchAllProductAsync,
+  fetchBrandsAsync,
+  fetchCategoriesAsync,
+  fetchProductByFilterAsync,
+  selectAllProducts,
+  selectBrands,
+  selectCategories,
+  selectTotalItems,
+} from "../features/product/productSlice";
+import { ITEMS_PER_PAGE } from "../services/Commons";
 
 const sortOptions = [
-  { name: "Most Popular", href: "#", current: true },
-  { name: "Best Rating", href: "#", current: false },
-  { name: "Newest", href: "#", current: false },
-  { name: "Price: Low to High", href: "#", current: false },
-  { name: "Price: High to Low", href: "#", current: false },
-];
-const subCategories = [
-  { name: "Totes", href: "#" },
-  { name: "Backpacks", href: "#" },
-  { name: "Travel Bags", href: "#" },
-  { name: "Hip Bags", href: "#" },
-  { name: "Laptop Sleeves", href: "#" },
-];
-const filters = [
-  {
-    id: "color",
-    name: "Color",
-    options: [
-      { value: "white", label: "White", checked: false },
-      { value: "beige", label: "Beige", checked: false },
-      { value: "blue", label: "Blue", checked: true },
-      { value: "brown", label: "Brown", checked: false },
-      { value: "green", label: "Green", checked: false },
-      { value: "purple", label: "Purple", checked: false },
-    ],
-  },
-  {
-    id: "category",
-    name: "Category",
-    options: [
-      { value: "new-arrivals", label: "New Arrivals", checked: false },
-      { value: "sale", label: "Sale", checked: false },
-      { value: "travel", label: "Travel", checked: true },
-      { value: "organization", label: "Organization", checked: false },
-      { value: "accessories", label: "Accessories", checked: false },
-    ],
-  },
-  {
-    id: "size",
-    name: "Size",
-    options: [
-      { value: "2l", label: "2L", checked: false },
-      { value: "6l", label: "6L", checked: false },
-      { value: "12l", label: "12L", checked: false },
-      { value: "18l", label: "18L", checked: false },
-      { value: "20l", label: "20L", checked: false },
-      { value: "40l", label: "40L", checked: true },
-    ],
-  },
+  { name: "Best Rating", sort: "rating", order: "desc", current: false },
+  { name: "Price: Low to High", sort: "price", order: "asc", current: false },
+  { name: "Price: High to Low", sort: "price", order: "desc", current: false },
 ];
 
 function classNames(...classes) {
@@ -81,7 +33,66 @@ function classNames(...classes) {
 }
 
 export default function CategoryFilter({ children }) {
+  const dispatch = useDispatch();
+  const categories = useSelector(selectCategories);
+  const brands = useSelector(selectBrands);
+  const totalItems = useSelector(selectTotalItems);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [filter, setFilter] = useState({});
+  const [sort, setSort] = useState({});
+  const [page, setPage] = useState(1);
+
+  const filters = [
+    {
+      id: "category",
+      name: "Category",
+      options: categories,
+    },
+    {
+      id: "brand",
+      name: "Brands",
+      options: brands,
+    },
+  ];
+
+  const handleFilter = (e, section, option) => {
+    const newFilter = { ...filter };
+    if (e.target.checked) {
+      if (newFilter[section.id]) {
+        newFilter[section.id].push(option.value);
+      } else {
+        newFilter[section.id] = [option.value];
+      }
+    } else {
+      const index = newFilter[section.id].findIndex(
+        (el) => el === option.value
+      );
+      newFilter[section.id].splice(index, 1);
+    }
+    setFilter(newFilter);
+  };
+
+  const handleSort = (e, option) => {
+    const sort = { _sort: option.sort, _order: option.order };
+    setSort(sort);
+  };
+  const handlePage = (page) => {
+    setPage(page);
+  };
+
+  useEffect(() => {
+    const pagination = { _page: page, _limit: ITEMS_PER_PAGE };
+    dispatch(fetchProductByFilterAsync({ filter, sort, pagination }));
+  }, [dispatch, filter, sort, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [totalItems, sort]);
+
+  useEffect(() => {
+    dispatch(fetchCategoriesAsync());
+    dispatch(fetchBrandsAsync());
+  }, [dispatch]);
 
   return (
     <div className="bg-white">
@@ -136,15 +147,7 @@ export default function CategoryFilter({ children }) {
                     <ul
                       role="list"
                       className="px-2 py-3 font-medium text-gray-900"
-                    >
-                      {subCategories.map((category) => (
-                        <li key={category.name}>
-                          <a href={category.href} className="block px-2 py-3">
-                            {category.name}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
+                    ></ul>
 
                     {filters.map((section) => (
                       <Disclosure
@@ -186,6 +189,9 @@ export default function CategoryFilter({ children }) {
                                       name={`${section.id}[]`}
                                       defaultValue={option.value}
                                       type="checkbox"
+                                      onClick={(e) =>
+                                        handleFilter(e, section, option)
+                                      }
                                       defaultChecked={option.checked}
                                       className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                     />
@@ -242,8 +248,8 @@ export default function CategoryFilter({ children }) {
                       {sortOptions.map((option) => (
                         <Menu.Item key={option.name}>
                           {({ active }) => (
-                            <a
-                              href={option.href}
+                            <p
+                              onClick={(e) => handleSort(e, option)}
                               className={classNames(
                                 option.current
                                   ? "font-medium text-gray-900"
@@ -253,7 +259,7 @@ export default function CategoryFilter({ children }) {
                               )}
                             >
                               {option.name}
-                            </a>
+                            </p>
                           )}
                         </Menu.Item>
                       ))}
@@ -292,13 +298,7 @@ export default function CategoryFilter({ children }) {
                 <ul
                   role="list"
                   className="space-y-4 border-b border-gray-200 pb-6 text-sm font-medium text-gray-900"
-                >
-                  {subCategories.map((category) => (
-                    <li key={category.name}>
-                      <a href={category.href}>{category.name}</a>
-                    </li>
-                  ))}
-                </ul>
+                ></ul>
 
                 {filters.map((section) => (
                   <Disclosure
@@ -340,6 +340,9 @@ export default function CategoryFilter({ children }) {
                                   name={`${section.id}[]`}
                                   defaultValue={option.value}
                                   type="checkbox"
+                                  onClick={(e) =>
+                                    handleFilter(e, section, option)
+                                  }
                                   defaultChecked={option.checked}
                                   className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
@@ -363,7 +366,12 @@ export default function CategoryFilter({ children }) {
               <div className="lg:col-span-3">{children}</div>
             </div>
           </section>
-          <Pagination></Pagination>
+          <Pagination
+            page={page}
+            setPage={setPage}
+            handlePage={handlePage}
+            totalItems={totalItems}
+          ></Pagination>
         </main>
       </div>
     </div>

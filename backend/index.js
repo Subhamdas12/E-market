@@ -3,7 +3,6 @@ const express = require("express");
 const server = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
-const authsRouter = require("./routes/Auths");
 const session = require("express-session");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
@@ -12,8 +11,12 @@ const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const crypto = require("crypto");
 const { User } = require("./models/User");
-const { sanitizeUser, cookieExtractor } = require("./services/Commons");
+const { sanitizeUser, cookieExtractor, isAuth } = require("./services/Commons");
 const cookieParser = require("cookie-parser");
+const authsRouter = require("./routes/Auths");
+const productRouter = require("./routes/Products");
+const categoryRouter = require("./routes/Categories");
+const brandRouter = require("./routes/Brands");
 //session middlewares
 server.use(cookieParser());
 server.use(
@@ -26,9 +29,13 @@ server.use(
 server.use(passport.authenticate("session"));
 
 //middlewares
-server.use(cors());
+server.use(express.static("build"));
+server.use(cors({ exposedHeaders: ["X-Total-Count"] }));
 server.use(express.json());
 server.use("/auths", authsRouter.router);
+server.use("/products", productRouter.router);
+server.use("/categories", categoryRouter.router);
+server.use("/brands", brandRouter.router);
 
 //passport strategies
 
@@ -54,6 +61,7 @@ passport.use(
           return done(null, false, { message: "invalid credentials" });
         }
         const token = jwt.sign(sanitizeUser(user), process.env.JWT_SECRET_KEY);
+
         return done(null, { id: user.id, role: user.role, token });
       }
     );

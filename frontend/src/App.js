@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 import {
   createBrowserRouter,
@@ -10,6 +10,9 @@ import Home from "./pages/Home";
 import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
 import Protected from "./authentication/Protected";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUserChecked } from "./features/auth/authSlice";
+import { checkUserAsync } from "./features/auth/authSlice";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -29,9 +32,14 @@ const router = createBrowserRouter([
   },
 ]);
 function App() {
+  const dispatch = useDispatch();
+  const userChecked = useSelector(selectUserChecked);
+  useEffect(() => {
+    dispatch(checkUserAsync());
+  }, [dispatch]);
   return (
     <div className="App">
-      <RouterProvider router={router} />
+      {userChecked && <RouterProvider router={router} />}
     </div>
   );
 }
