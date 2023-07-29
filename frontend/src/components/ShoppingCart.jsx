@@ -16,7 +16,6 @@ export default function ShoppingCart({ open, setOpen }) {
   const items = useSelector(selectItems);
   const dispatch = useDispatch();
   const [openModal, setOpenModal] = useState(null);
-  console.log(items);
   const totalAmount = items.reduce((amount, item) => {
     return discountedPrice(item.product) * item.quantity + amount;
   }, 0);

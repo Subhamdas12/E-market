@@ -17,6 +17,7 @@ const productSchema = new Schema({
     type: Number,
     min: [0, "wrong min rating"],
     max: [5, "wrong maxrating"],
+    default: 0,
   },
   stock: {
     type: Number,

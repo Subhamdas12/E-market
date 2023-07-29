@@ -18,6 +18,8 @@ const productRouter = require("./routes/Products");
 const categoryRouter = require("./routes/Categories");
 const brandRouter = require("./routes/Brands");
 const cartRouter = require("./routes/Carts");
+const userRouter = require("./routes/Users");
+const orderRouter = require("./routes/Orders");
 //session middlewares
 server.use(cookieParser());
 server.use(
@@ -44,6 +46,8 @@ server.use("/products", isAuth(), productRouter.router);
 server.use("/categories", isAuth(), categoryRouter.router);
 server.use("/brands", isAuth(), brandRouter.router);
 server.use("/carts", isAuth(), cartRouter.router);
+server.use("/users", isAuth(), userRouter.router);
+server.use("/orders", isAuth(), orderRouter.router);
 
 //passport strategies
 

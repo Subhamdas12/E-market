@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import "./App.css";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -17,6 +16,13 @@ import { positions, Provider } from "react-alert";
 import AlertTemplate from "react-alert-template-basic";
 import ProductOverviewPage from "./pages/ProductOverviewPage";
 import { fetchItemsByUserIdAsync } from "./features/cart/cartSlice";
+import { fetchLoggedInUserAsync } from "./features/user/userSlice";
+import UserProfilePage from "./pages/UserProfilePage";
+import Checkout from "./containers/Checkout";
+import UserOrderPage from "./pages/UserOrderPage";
+import PageNotFound from "./components/PageNotFound";
+import OrderSuccess from "./components/OrderSuccess";
+import Logout from "./containers/Logout";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -35,12 +41,52 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: "/userProfiles",
+    element: (
+      <Protected>
+        <UserProfilePage />,
+      </Protected>
+    ),
+  },
+  {
+    path: "/checkout",
+    element: (
+      <Protected>
+        <Checkout />
+      </Protected>
+    ),
+  },
+  {
+    path: "/userOrders",
+    element: (
+      <Protected>
+        <UserOrderPage />
+      </Protected>
+    ),
+  },
+  {
+    path: "/orderSuccess/:id",
+    element: (
+      <Protected>
+        <OrderSuccess />
+      </Protected>
+    ),
+  },
+  {
     path: "/signup",
     element: <SignupPage></SignupPage>,
   },
   {
     path: "/login",
     element: <LoginPage></LoginPage>,
+  },
+  {
+    path: "/logout",
+    element: <Logout />,
+  },
+  {
+    path: "*",
+    element: <PageNotFound />,
   },
 ]);
 const options = {
@@ -56,6 +102,7 @@ function App() {
   }, [dispatch]);
   useEffect(() => {
     dispatch(fetchItemsByUserIdAsync());
+    dispatch(fetchLoggedInUserAsync());
   }, [dispatch, user]);
   return (
     <div className="App">
