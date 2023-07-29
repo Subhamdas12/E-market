@@ -17,6 +17,7 @@ const authsRouter = require("./routes/Auths");
 const productRouter = require("./routes/Products");
 const categoryRouter = require("./routes/Categories");
 const brandRouter = require("./routes/Brands");
+const cartRouter = require("./routes/Carts");
 //session middlewares
 server.use(cookieParser());
 server.use(
@@ -32,10 +33,17 @@ server.use(passport.authenticate("session"));
 server.use(express.static("build"));
 server.use(cors({ exposedHeaders: ["X-Total-Count"] }));
 server.use(express.json());
+// server.use("/auths", authsRouter.router);
+// server.use("/products", productRouter.router);
+// server.use("/categories", categoryRouter.router);
+// server.use("/brands", brandRouter.router);
+// server.use("/carts", cartRouter.router);
+
 server.use("/auths", authsRouter.router);
-server.use("/products", productRouter.router);
-server.use("/categories", categoryRouter.router);
-server.use("/brands", brandRouter.router);
+server.use("/products", isAuth(), productRouter.router);
+server.use("/categories", isAuth(), categoryRouter.router);
+server.use("/brands", isAuth(), brandRouter.router);
+server.use("/carts", isAuth(), cartRouter.router);
 
 //passport strategies
 

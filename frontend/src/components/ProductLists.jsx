@@ -27,7 +27,7 @@ export default function ProductList() {
             />
           ) : null}
           {products.map((product, index) => (
-            <Link to={`/productDetail/${product.id}`} key={product.id}>
+            <Link to={`/productOverview/${product.id}`} key={product.id}>
               <div
                 key={product.id}
                 className="group relative border-solid border-2 p-2 border-gray-200"
