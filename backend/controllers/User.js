@@ -4,10 +4,11 @@ exports.fetchUserById = async (req, res) => {
   try {
     const user = await User.findById(id);
     res.status(200).json({
-      id: user.id, //TODO:need to remove the ID
+      //TODO:need to remove the ID
       addresses: user.addresses,
       email: user.email,
       role: user.role,
+      name: user.name,
     });
   } catch (err) {
     console.log(err);

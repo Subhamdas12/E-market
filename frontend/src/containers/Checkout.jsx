@@ -17,6 +17,7 @@ import {
 import Modal from "../components/Modal";
 import { selectUserInfo, updateUserAsync } from "../features/user/userSlice";
 import { discountedPrice } from "../services/Commons";
+import { useAlert } from "react-alert";
 
 function Checkout() {
   const {
@@ -29,6 +30,7 @@ function Checkout() {
   const currentOrder = useSelector(selectCurrentOrder);
   const items = useSelector(selectItems);
   const user = useSelector(selectUserInfo);
+  const alert = useAlert();
   const dispatch = useDispatch();
   const cartLoaded = useSelector(selectCartLoaded);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -59,14 +61,13 @@ function Checkout() {
         items,
         totalAmount,
         totalItems,
-        user: user.id,
         paymentMethod,
         selectedAddress,
         status: "pending",
       };
       dispatch(createOrderAsync(order));
     } else {
-      alert("Address is missing");
+      alert.show("Address is missing");
     }
   };
   return (

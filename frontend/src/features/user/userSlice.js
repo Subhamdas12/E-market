@@ -8,6 +8,7 @@ import {
 const initialState = {
   status: "idle",
   userInfo: null,
+  userOrdersLoaded: false,
 };
 
 export const fetchLoggedInUserOrdersAsync = createAsyncThunk(
@@ -46,10 +47,12 @@ export const userSlice = createSlice({
     builder
       .addCase(fetchLoggedInUserOrdersAsync.pending, (state) => {
         state.status = "loading";
+        state.userOrdersLoaded = false;
       })
       .addCase(fetchLoggedInUserOrdersAsync.fulfilled, (state, action) => {
         state.status = "idle";
         state.userInfo.orders = action.payload;
+        state.userOrdersLoaded = true;
       })
       .addCase(updateUserAsync.pending, (state) => {
         state.status = "loading";
@@ -67,6 +70,7 @@ export const userSlice = createSlice({
       });
   },
 });
+export const selectUserOrderLoaded = (state) => state.user.userOrdersLoaded;
 export const selectUserOrders = (state) => state.user.userInfo.orders;
 export const selectUserInfo = (state) => state.user.userInfo;
 export const selectUserStatus = (state) => state.user.state;

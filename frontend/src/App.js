@@ -23,6 +23,11 @@ import UserOrderPage from "./pages/UserOrderPage";
 import PageNotFound from "./components/PageNotFound";
 import OrderSuccess from "./components/OrderSuccess";
 import Logout from "./containers/Logout";
+import AdminProductOverviewPage from "./pages/Admin/AdminProductOverviewPage";
+import ProtectedAdmin from "./authentication/ProtectedAdmin";
+import AdminProductFormPage from "./pages/Admin/AdminProductFormPage";
+import AdminOrderPage from "./pages/Admin/AdminOrderPage";
+import AdminHome from "./pages/Admin/AdminHome";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -70,6 +75,47 @@ const router = createBrowserRouter([
       <Protected>
         <OrderSuccess />
       </Protected>
+    ),
+  },
+  //admin routes
+  {
+    path: "/admin",
+    element: (
+      <ProtectedAdmin>
+        <AdminHome />
+      </ProtectedAdmin>
+    ),
+  },
+  {
+    path: "/admin/productOverview/:id",
+    element: (
+      <ProtectedAdmin>
+        <AdminProductOverviewPage />
+      </ProtectedAdmin>
+    ),
+  },
+  {
+    path: "/admin/product-form",
+    element: (
+      <ProtectedAdmin>
+        <AdminProductFormPage />
+      </ProtectedAdmin>
+    ),
+  },
+  {
+    path: "/admin/product-form/edit/:id",
+    element: (
+      <ProtectedAdmin>
+        <AdminProductFormPage />
+      </ProtectedAdmin>
+    ),
+  },
+  {
+    path: "/admin/orders",
+    element: (
+      <ProtectedAdmin>
+        <AdminOrderPage />
+      </ProtectedAdmin>
     ),
   },
   {

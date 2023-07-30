@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import {
   fetchLoggedInUserOrdersAsync,
+  selectUserOrderLoaded,
   selectUserOrders,
   selectUserStatus,
 } from "../features/user/userSlice";
@@ -12,7 +13,7 @@ export default function UserOrder() {
   const dispatch = useDispatch();
   const status = useSelector(selectUserStatus);
   const orders = useSelector(selectUserOrders);
-
+  const orderLoaded = useSelector(selectUserOrderLoaded);
   useEffect(() => {
     dispatch(fetchLoggedInUserOrdersAsync());
   }, [dispatch]);
@@ -20,6 +21,7 @@ export default function UserOrder() {
   return (
     <div>
       {orders &&
+        orderLoaded &&
         orders.map((order) => (
           <div key={order.id}>
             <div>
